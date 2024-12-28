@@ -1,17 +1,3 @@
-// Copyright 2023 The MediaPipe Authors.
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-
-//      http://www.apache.org/licenses/LICENSE-2.0
-
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import vision from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 const { FaceLandmarker, FilesetResolver, DrawingUtils } = vision;
 const demosSection = document.getElementById("demos");
@@ -19,9 +5,9 @@ const imageBlendShapes = document.getElementById("image-blend-shapes");
 const videoBlendShapes = document.getElementById("video-blend-shapes");
 
 let faceLandmarker;
-let runningMode: "IMAGE" | "VIDEO" = "IMAGE";
-let enableWebcamButton: HTMLButtonElement;
-let webcamRunning: Boolean = false;
+let runningMode = "IMAGE"; // "IMAGE" or "VIDEO"
+let enableWebcamButton;
+let webcamRunning = false;
 const videoWidth = 480;
 
 // Before we can use HandLandmarker class we must wait for it to finish
@@ -82,8 +68,8 @@ async function handleClick(event) {
   // different image data each time. This returns a promise
   // which we wait to complete and then call a function to
   // print out the results of the prediction.
-  const faceLandmarkerResult = faceLandmarker.detect(event.target);
-  const canvas = document.createElement("canvas") as HTMLCanvasElement;
+  const faceLandmarkerResult = await faceLandmarker.detect(event.target);
+  const canvas = document.createElement("canvas");
   canvas.setAttribute("class", "canvas");
   canvas.setAttribute("width", event.target.naturalWidth + "px");
   canvas.setAttribute("height", event.target.naturalHeight + "px");
@@ -147,10 +133,8 @@ async function handleClick(event) {
 // Demo 2: Continuously grab image from webcam stream and detect it.
 ********************************************************************/
 
-const video = document.getElementById("webcam") as HTMLVideoElement;
-const canvasElement = document.getElementById(
-  "output_canvas"
-) as HTMLCanvasElement;
+const video = document.getElementById("webcam");
+const canvasElement = document.getElementById("output_canvas");
 
 const canvasCtx = canvasElement.getContext("2d");
 
@@ -162,9 +146,7 @@ function hasGetUserMedia() {
 // If webcam supported, add event listener to button for when user
 // wants to activate it.
 if (hasGetUserMedia()) {
-  enableWebcamButton = document.getElementById(
-    "webcamButton"
-  ) as HTMLButtonElement;
+  enableWebcamButton = document.getElementById("webcamButton");
   enableWebcamButton.addEventListener("click", enableCam);
 } else {
   console.warn("getUserMedia() is not supported by your browser");
@@ -216,7 +198,7 @@ async function predictWebcam() {
   let startTimeMs = performance.now();
   if (lastVideoTime !== video.currentTime) {
     lastVideoTime = video.currentTime;
-    results = faceLandmarker.detectForVideo(video, startTimeMs);
+    results = await faceLandmarker.detectForVideo(video, startTimeMs);
   }
   if (results.faceLandmarks) {
     for (const landmarks of results.faceLandmarks) {
@@ -275,7 +257,7 @@ async function predictWebcam() {
   }
 }
 
-function drawBlendShapes(el: HTMLElement, blendShapes: any[]) {
+function drawBlendShapes(el, blendShapes) {
   if (!blendShapes.length) {
     return;
   }
